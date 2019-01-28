@@ -302,6 +302,49 @@ function getRightText(elements: Element[], topLeftText: string, rightText: strin
     return intersectingElements.map(element => element.text).join(" ").trim().replace(/\s\s+/g, " ");
 }
 
+// Gets the text to the left in a rectangle, where the rectangle is delineated by the positions
+// in which the three specified strings of (case sensitive) text are found.
+
+function getLeftText(elements: Element[], topRightText: string, leftText: string, bottomText: string) {
+    // Construct a bounding rectangle in which the expected text should appear.  Any elements
+    // over 50% within the bounding rectangle will be assumed to be part of the expected text.
+
+    let topRightElement = findElement(elements, topRightText, true);
+    let leftElement = (leftText === undefined) ? undefined : findElement(elements, leftText, false);
+    let bottomElement = (bottomText === undefined) ? undefined : findElement(elements, bottomText, false);
+    if (topRightElement === undefined || leftElement === undefined || bottomElement === undefined)
+        return undefined;
+
+    let x = leftElement.x + leftElement.width;
+    let y = topRightElement.y;
+    let width = topRightElement.x - x;
+    let height = bottomElement.y - y;
+
+    let bounds: Rectangle = { x: x, y: y, width: width, height: height };
+
+    // Gather together all elements that are at least 50% within the bounding rectangle.
+
+    let intersectingElements: Element[] = []
+    for (let element of elements) {
+        let intersectingBounds = intersect(element, bounds);
+        let intersectingArea = intersectingBounds.width * intersectingBounds.height;
+        let elementArea = element.width * element.height;
+        if (elementArea > 0 && intersectingArea * 2 > elementArea && element.text !== ":")
+            intersectingElements.push(element);
+    }
+    if (intersectingElements.length === 0)
+        return undefined;
+
+    // Sort the elements by Y co-ordinate and then by X co-ordinate.
+
+    let elementComparer = (a: Element, b: Element) => (a.y > b.y) ? 1 : ((a.y < b.y) ? -1 : ((a.x > b.x) ? 1 : ((a.x < b.x) ? -1 : 0)));
+    intersectingElements.sort(elementComparer);
+
+    // Join the elements into a single string.
+
+    return intersectingElements.map(element => element.text).join(" ").trim().replace(/\s\s+/g, " ");
+}
+
 // Gets the text downwards in a rectangle, where the rectangle is delineated by the positions in
 // which the three specified strings of (case sensitive) text are found.
 
@@ -363,15 +406,18 @@ function parseApplicationElements(elements: Element[], startElement: Element, in
 
     let receivedDateText = "";
 
-    if (elements.some(element => element.text.trim() == "Application Received")) {
+    if (elements.some(element => element.text.trim() === "Application Received")) {
         receivedDateText = getRightText(elements, "Application Received", "Planning Approval", "Land Division Approval");
         if (receivedDateText === undefined)
             receivedDateText = getRightText(elements, "Application Date", "Planning Approval", "Application Received");
-    }
-    else if (elements.some(element => element.text.trim() == "Application received")) {
-        receivedDateText = getRightText(elements, "Application received", "Planning Approval", "Land Division Approval");  
+    } else if (elements.some(element => element.text.trim() === "Application received")) {
+        receivedDateText = getRightText(elements, "Application received", "Planning Approval", "Land Division Approval");
         if (receivedDateText === undefined)
-            receivedDateText = getRightText(elements, "Application Date", "Planning Approval", "Application received");  
+            receivedDateText = getRightText(elements, "Application Date", "Planning Approval", "Application received");
+    } else if (elements.some(element => element.text.trim() === "Building Approval")) {
+        receivedDateText = getLeftText(elements, "Building Approval", "Application Date", "Building  received");
+        if (receivedDateText === undefined)
+            receivedDateText = getRightText(elements, "Application Date", "Planning Approval", "Building Approval");
     }
 
     let receivedDate: moment.Moment = undefined;
