@@ -559,11 +559,11 @@ function parseApplicationElements(elements: Element[], startElement: Element, in
         // the address that has a house number.
 
         if (/[0-9]+[a-zA-Z]?/.test(houseNumber1))
-            address = houseNumber1 + " " + streetName1 + ", " + (SuburbNames[suburbName1.toUpperCase()] || suburbName1);
+            address = houseNumber1 + " " + ((streetName1 === undefined) ? "" : streetName1) + ", " + (SuburbNames[suburbName1.toUpperCase()] || suburbName1);
         else if (/[0-9]+[a-zA-Z]?/.test(houseNumber2))
-            address = houseNumber2 + " " + streetName2 + ", " + (SuburbNames[suburbName2.toUpperCase()] || suburbName2);
+            address = houseNumber2 + " " + ((streetName2 === undefined) ? "" : streetName2) + ", " + (SuburbNames[suburbName2.toUpperCase()] || suburbName2);
         else
-            address = houseNumber1 + " " + streetName1 + ", " + (SuburbNames[suburbName1.toUpperCase()] || suburbName1);
+            address = houseNumber1 + " " + ((streetName1 === undefined) ? "" : streetName1) + ", " + (SuburbNames[suburbName1.toUpperCase()] || suburbName1);
     } else {
         suburbName = suburbName.replace(/^HD /, "").replace(/ SA$/, "");
         address = `${houseNumber} ${streetName}, ${SuburbNames[suburbName.toUpperCase()] || suburbName}`;
