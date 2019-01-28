@@ -369,7 +369,7 @@ function parseApplicationElements(elements: Element[], startElement: Element, in
             receivedDateText = getRightText(elements, "Application Date", "Planning Approval", "Application Received");
     }
     else if (elements.some(element => element.text.trim() == "Application received")) {
-        receivedDateText = getRightText(elements, "Application received", "Planning Approval", "Building Application");  
+        receivedDateText = getRightText(elements, "Application received", "Planning Approval", "Land Division Approval");  
         if (receivedDateText === undefined)
             receivedDateText = getRightText(elements, "Application Date", "Planning Approval", "Application received");  
     }
@@ -384,14 +384,14 @@ function parseApplicationElements(elements: Element[], startElement: Element, in
     if (houseNumber === undefined || houseNumber === "0")
         houseNumber = "";
 
-    let streetName = getRightText(elements, "Property Street", "Planning Conditions", "Property Suburb");
+    let streetName = getRightText(elements, "Property street", "Planning Conditions", "Property suburb");
     if (streetName === undefined || streetName === "" || streetName === "0") {
         let elementSummary = elements.map(element => `[${element.text}]`).join("");
         console.log(`Application number ${applicationNumber} will be ignored because an address was not found or parsed (there is no street name).  Elements: ${elementSummary}`);
         return undefined;
     }
 
-    let suburbName = getRightText(elements, "Property Suburb", "Planning Conditions", "Title");
+    let suburbName = getRightText(elements, "Property suburb", "Planning Conditions", "Title");
     if (suburbName === undefined || suburbName === "" || suburbName === "0") {
         let elementSummary = elements.map(element => `[${element.text}]`).join("");
         console.log(`Application number ${applicationNumber} will be ignored because an address was not found or parsed (there is no suburb name for street \"${streetName}\").  Elements: ${elementSummary}`);
